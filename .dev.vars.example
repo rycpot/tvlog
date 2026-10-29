@@ -1,0 +1,5 @@
+# Copy to .dev.vars for local development. Never commit .dev.vars.
+ADMIN_PASSWORD=change-me
+BREVO_API_KEY=
+DIGEST_TO=you@example.com
+DIGEST_FROM=sender-verified-in-brevo@example.com

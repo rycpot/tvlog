@@ -1,0 +1,41 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "tvlog",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-01",
+  "workers_dev": true,
+  "preview_urls": false,
+  // Lets src/schema.js import the migration files as text.
+  "rules": [{ "type": "Text", "globs": ["**/*.sql"], "fallthrough": true }],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    // /show/123 and other page paths get index.html.
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "tvlog",
+      // Paste the id printed by `npx wrangler d1 create tv-shows`.
+      "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_ID",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // Runs every 30 minutes. At the weekly email's time of day it refreshes
+  // episode data, and on the email's day it sends the email. Pick the day and
+  // time with the gear on the email preview page.
+  "triggers": { "crons": ["*/30 * * * *"] },
+  "vars": {
+    // Time zone for dates on the site and in the email.
+    "TIMEZONE": "UTC",
+    // When the email goes out (UTC) until a time is saved on the preview page.
+    // Day: 0 = Sunday ... 6 = Saturday.
+    "DIGEST_DAY": "0",
+    "DIGEST_TIME": "18:00"
+  },
+  // Keep variables added in the Cloudflare dashboard across deploys.
+  "keep_vars": true,
+  "observability": { "enabled": true }
+}
