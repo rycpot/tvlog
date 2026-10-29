@@ -13,7 +13,7 @@ const authButton = document.getElementById('auth');
 const loginDialog = document.getElementById('login');
 
 let admin = false;
-let tz = 'UTC';
+let tz; // the owner's time zone when signed in, else the browser's own
 let current = null; // the show page's data while it is open
 let lastState = null; // the homepage's data while it is open
 const notices = []; // banners shown above the homepage lists, each (state) => html

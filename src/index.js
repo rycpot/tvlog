@@ -29,8 +29,9 @@ function validRating(r) {
 }
 
 async function state(env, admin) {
+  // Visitors don't get the owner's time zone; their browser uses its own.
+  if (!admin) return { admin, shows: await listShows(env) };
   const tz = env.TIMEZONE || 'UTC';
-  if (!admin) return { admin, tz, shows: await listShows(env) };
   // Upcoming and catch-up lists are only for the signed-in owner. The queries
   // run side by side, so the page waits for one database round trip, not four.
   const now = new Date();
@@ -60,7 +61,7 @@ async function api(request, env, url) {
 
   if (path === '/api/state' && method === 'GET') return json(await state(env, admin));
   // Just enough for a show page: who is viewing and the time zone.
-  if (path === '/api/session' && method === 'GET') return json({ admin, tz: env.TIMEZONE || 'UTC' });
+  if (path === '/api/session' && method === 'GET') return json(admin ? { admin, tz: env.TIMEZONE || 'UTC' } : { admin });
 
   if (path === '/api/login' && method === 'POST') {
     const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
