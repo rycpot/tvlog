@@ -4,6 +4,9 @@ A small, good-looking TV tracker you host yourself for free. Keep track of what 
 rate shows, see what's airing next, and get a weekly email of the coming week's episodes. It all runs on the
 Cloudflare free plan as a single Worker, with no server to look after.
 
+**See it live:** [tv-shows.rycpot.workers.dev](https://tv-shows.rycpot.workers.dev/) is a real tvlog install. As a
+visitor you see the four lists; the owner signs in to get Catch up, Upcoming and editing.
+
 ## What it can do
 
 - **Four lists:** Watching, Plan to watch, Finished and Dropped, each with its total at the top.
