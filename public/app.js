@@ -216,7 +216,6 @@ function upcoming(weeks) {
     </section>`;
 }
 
-
 /* ---------- Show page ---------- */
 
 async function renderShow(id, { refetch = true } = {}) {

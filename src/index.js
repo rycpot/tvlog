@@ -36,13 +36,12 @@ async function state(env, admin) {
   // run side by side, so the page waits for one database round trip, not four.
   const now = new Date();
   const first = startOfWeek(now, tz);
-  const [shows, upcoming, backlog, ...extras] = await Promise.all([
+  const [shows, upcoming, backlog] = await Promise.all([
     listShows(env),
     upcomingEpisodes(env, first, addWeeks(first, UPCOMING_WEEKS, tz), tz),
     backlogEpisodes(env, now),
   ]);
   return {
-    ...Object.assign({}, ...extras),
     admin, tz, shows,
     weeks: groupByWeek(upcoming, first, UPCOMING_WEEKS, tz),
     backlogTotal: backlog.total,
@@ -148,7 +147,6 @@ async function api(request, env, url) {
     const denied = needAdmin(); if (denied) return denied;
     return json(await refresh(env));
   }
-
 
   if (path === '/api/digest' && method === 'GET') {
     const denied = needAdmin(); if (denied) return denied;
