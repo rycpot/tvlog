@@ -199,10 +199,10 @@ function catchUp(backlog, total) {
     </section>`;
 }
 
-// Episodes whose airstamp has passed are dimmed: the same moment they join
-// Catch up, so it needs no time zone.
+// Episodes are dimmed an hour after their airstamp, once they've surely
+// finished airing. The airstamp is an instant, so it needs no time zone.
 function upcoming(weeks) {
-  const now = Date.now();
+  const cutoff = Date.now() - 60 * 60 * 1000;
   return `
     <section class="block up-block" aria-label="Upcoming episodes">
       <div class="head"><h2>Upcoming</h2><span><a href="/api/digest" target="_blank" rel="noopener">Preview email</a></span></div>
@@ -210,7 +210,7 @@ function upcoming(weeks) {
         <div class="week">
           <div class="week-head"><b>${w.label}</b><span>${w.range}</span></div>
           ${w.episodes.length ? w.episodes.map((e) => `
-            <a class="up${e.airstamp && Date.parse(e.airstamp) <= now ? ' aired' : ''}" href="/show/${e.show_id}">
+            <a class="up${e.airstamp && Date.parse(e.airstamp) <= cutoff ? ' aired' : ''}" href="/show/${e.show_id}">
               <span class="when">${e.weekday} ${e.day}</span>
               <span class="what">${esc(e.show_name)}</span>
               <span class="code num">${e.code}</span>
