@@ -126,6 +126,8 @@ input:focus-visible { outline: none; }
 .up .when small { display: block; font-weight: 500; font-size: 12px; }
 .up .what { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .up .code { font-size: 13px; font-weight: 600; }
+.up.aired .what, .up.aired .code { color: var(--muted); font-weight: 500; }
+.up.aired:hover .what, .up.aired:hover .code { color: var(--accent-ink); }
 .week .none { border-top: 1px solid var(--line); border-bottom: 0; padding: 12px 0; font-size: 14px; }
 
 /* Show page */
