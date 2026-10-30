@@ -1,5 +1,10 @@
 # tvlog
 
+| | |
+| --- | --- |
+| ![What visitors see: the four list totals and the Watching list](docs/screenshots/1-visitor.png) | ![Signed in: the lists with Catch up and Upcoming beside them](docs/screenshots/2-owner.png) |
+| ![Searching for a show to add](docs/screenshots/3-search.png) | ![A show's page with its list, rating, progress and episodes](docs/screenshots/4-show.png) |
+
 A small, good-looking TV tracker you host yourself for free. Keep track of what you're watching, tick off episodes,
 rate shows, see what's airing next, and get a weekly email of the coming week's episodes. It all runs on the
 Cloudflare free plan as a single Worker, with no server to look after.
