@@ -73,7 +73,7 @@ input:focus-visible { outline: none; }
 .side { min-width: 0; display: flex; flex-direction: column; }
 .block { display: flex; flex-direction: column; gap: 32px; }
 /* A heavy rule and open space set Upcoming apart from Catch up. */
-.block + .block { margin-top: 72px; padding-top: 32px; border-top: 8px solid var(--ink); }
+.block + .block { margin-top: 32px; padding-top: 32px; border-top: 8px solid var(--ink); }
 @media (min-width: 1200px) {
   .owner .layout { grid-template-columns: minmax(0, 1fr) minmax(340px, 31%); gap: 72px; }
 }
