@@ -109,9 +109,17 @@ function airDate(e) {
 
 /* ---------- Home ---------- */
 
+// Catch up ticks still waiting for the server. The homepage is reloaded
+// only once none are left, and rows still waiting stay ticked, so a reload
+// can never redraw a ticked row as unticked.
+const pendingCatch = new Set();
+let homeLoad = 0;
+
 async function renderHome() {
   current = null;
+  const load = ++homeLoad;
   const state = await api('/api/state');
+  if (load !== homeLoad) return; // a newer reload is on its way
   setPage('home');
   lastState = state;
   tz = state.tz;
@@ -185,7 +193,7 @@ for (const width of [1040, 720]) {
 
 function catchUp(backlog, total) {
   const items = backlog.map((e) => `
-    <button class="catch" type="button" data-catch="${e.id}" data-show="${e.show_id}" aria-label="Mark ${esc(e.show_name)} ${e.code} watched">
+    <button class="catch" type="button" data-catch="${e.id}" data-show="${e.show_id}"${pendingCatch.has(e.id) ? ' disabled aria-pressed="true"' : ''} aria-label="Mark ${esc(e.show_name)} ${e.code} watched">
       <span class="box" aria-hidden="true"></span>
       <span class="catch-text">
         <span class="what">${esc(e.show_name)}</span>
@@ -353,17 +361,20 @@ function mutate(action) {
 view.addEventListener('click', async (event) => {
   const done = event.target.closest('[data-catch]');
   if (done && !current) {
+    const episodeId = Number(done.dataset.catch);
     done.disabled = true;
     done.setAttribute('aria-pressed', 'true');
+    pendingCatch.add(episodeId);
     try {
       const { category } = await api(`/api/shows/${done.dataset.show}/episodes`, {
-        method: 'POST', body: { episodeId: Number(done.dataset.catch), mode: 'upto' },
+        method: 'POST', body: { episodeId, mode: 'upto' },
       });
       if (category === 'finished') toast('Every episode watched: moved to Finished');
     } catch (err) {
       toast(err.message);
     }
-    renderHome();
+    pendingCatch.delete(episodeId);
+    if (!pendingCatch.size && !current) renderHome();
     return;
   }
   const rate = event.target.closest('[data-rate][data-show]');
