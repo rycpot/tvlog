@@ -29,6 +29,12 @@ function midnight(year, month, day, tz) {
   return new Date(utc - zoned(new Date(guess), tz).offset);
 }
 
+// The instant of local midnight at the start of a "2026-10-28" date.
+export function dayStart(ymd, tz) {
+  const [y, m, d] = ymd.split('-').map(Number);
+  return midnight(y, m, d, tz);
+}
+
 // The instant of local midnight at the start of the day containing `date`.
 export function startOfDay(date, tz) {
   const z = zoned(date, tz);

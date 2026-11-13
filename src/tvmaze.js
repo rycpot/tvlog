@@ -1,7 +1,14 @@
 // Thin client for the TVmaze public API (https://www.tvmaze.com/api).
 // No key needed. Limit is about 20 calls every 10 seconds per IP.
 
+import { dayStart } from './time.js';
+
 const BASE = 'https://api.tvmaze.com';
+// Streaming services release on their own schedule and TVmaze often lists
+// only the date, with a noon UTC placeholder as the airstamp. Those episodes
+// count as aired from the start of the air date in US Eastern time instead,
+// since services almost never release earlier than that.
+const STREAMING_TZ = 'America/New_York';
 
 // Only search results may come from Cloudflare's cache. Show data and the
 // update list must be current, or a refresh could save a stale copy and
@@ -39,16 +46,22 @@ export async function searchShows(env, query) {
   return results.map((r) => summarize(r.show));
 }
 
+function airstamp(e, streaming) {
+  if (streaming && !e.airtime && e.airdate) return dayStart(e.airdate, STREAMING_TZ).toISOString();
+  return e.airstamp ? new Date(e.airstamp).toISOString() : null;
+}
+
 // The show plus every regular episode (specials are left out by TVmaze).
 export async function fetchShow(env, id) {
   const show = await get(env, `/shows/${id}?embed=episodes`);
   if (!show) return null;
+  const streaming = !show.network && !!show.webChannel;
   const episodes = (show._embedded?.episodes ?? []).map((e) => ({
     id: e.id,
     season: e.season,
     number: e.number,
     name: e.name,
-    airstamp: e.airstamp ? new Date(e.airstamp).toISOString() : null,
+    airstamp: airstamp(e, streaming),
     // The date in the network's own time zone, as TVmaze lists it.
     airdate: e.airdate || null,
     runtime: e.runtime ?? null,

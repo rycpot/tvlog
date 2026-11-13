@@ -11,8 +11,8 @@ import { addWeeks, dateParts, episodeCode, episodeDate, groupByWeek, startOfWeek
 import { fetchShow, recentUpdates, searchShows } from './tvmaze.js';
 
 const UPCOMING_WEEKS = 4;
-// The free plan allows 50 D1 queries per invocation. A cold start spends 3 on
-// the schema check (15 on an empty database), the schedule 1, the stale-show
+// The free plan allows 50 D1 queries per invocation. A cold start spends 4 on
+// the schema check (16 on an empty database), the schedule 1, the stale-show
 // lookup 1, the recount 1, the digest 1, and each show refresh 3, so 12 shows fit.
 const REFRESH_PER_RUN = 12;
 

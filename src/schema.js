@@ -41,6 +41,16 @@ async function addAirdate(env, columns) {
   ]);
 }
 
+// Streaming episodes without an air time now count from the start of their
+// air date (see tvmaze.js). The first start with that rule marks every show
+// for a fresh download so stored episodes pick it up, Watching shows first.
+// The insert writes nothing once the marker exists.
+async function streamingAirstamps(env) {
+  const { meta } = await env.DB.prepare(
+    "INSERT INTO settings (key, value) VALUES ('streaming_airstamps', '1') ON CONFLICT(key) DO NOTHING").run();
+  if (meta.changes) await env.DB.prepare('UPDATE shows SET refreshed_at = NULL').run();
+}
+
 // Table and index names the migrations create.
 function created(sql) {
   return [...sql.matchAll(/CREATE\s+(?:TABLE|INDEX)\s+IF\s+NOT\s+EXISTS\s+(\w+)/gi)].map((m) => m[1]);
@@ -68,6 +78,7 @@ export function ensureSchema(env) {
       const [shows, episodes] = tables.map((t) => t.results.map((c) => c.name));
       await addCounts(env, shows);
       await addAirdate(env, episodes);
+      await streamingAirstamps(env);
     })
     .catch((err) => { ready = undefined; throw err; });
   return ready;
