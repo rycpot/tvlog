@@ -57,9 +57,11 @@ export function addWeeks(weekStart, n, tz) {
   return startOfWeek(addDays(weekStart, n * 7 + 0.5), tz);
 }
 
-// "Oct 26 – Nov 1" for the week starting at `weekStart`.
-export function weekRange(weekStart, tz) {
-  const a = zoned(weekStart, tz);
+// "Oct 26 – Nov 1" for the week starting at `weekStart`. `from` ("2026-10-25")
+// starts the range on an earlier day instead.
+export function weekRange(weekStart, tz, from) {
+  const [, m, d] = (from ?? localDate(weekStart, tz)).split('-').map(Number);
+  const a = { month: m, day: d };
   const b = zoned(addDays(weekStart, 6.5), tz);
   return a.month === b.month
     ? `${MONTHS[a.month - 1]} ${a.day} – ${b.day}`
@@ -96,16 +98,20 @@ export function episodeCode(season, number) {
 }
 
 // Group episodes into weeks starting at `firstWeek`, by the day they air.
+// Episodes dated before the first week (not yet aired, but dated in the US the
+// day before the local week began) go at the top of the first week, and its
+// range starts on their day.
 export function groupByWeek(episodes, firstWeek, weeks, tz) {
   const out = [];
   for (let i = 0; i < weeks; i++) {
     const start = addWeeks(firstWeek, i, tz);
     const [first, last] = [localDate(start, tz), localDate(addWeeks(firstWeek, i + 1, tz), tz)];
+    const inWeek = episodes.filter((e) => { const d = episodeDate(e, tz); return (i === 0 || d >= first) && d < last; });
+    const earliest = inWeek.reduce((min, e) => { const d = episodeDate(e, tz); return d < min ? d : min; }, first);
     out.push({
       label: weekLabel(i),
-      range: weekRange(start, tz),
-      episodes: episodes
-        .filter((e) => { const d = episodeDate(e, tz); return d >= first && d < last; })
+      range: weekRange(start, tz, earliest),
+      episodes: inWeek
         // Stable sort, so episodes on the same day keep their airstamp order.
         .sort((a, b) => episodeDate(a, tz).localeCompare(episodeDate(b, tz)))
         .map((e) => ({ ...e, ...dateParts(episodeDate(e, tz)), code: episodeCode(e.season, e.number) })),

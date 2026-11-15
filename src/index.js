@@ -7,7 +7,9 @@ import { buildDigest, sendDigest } from './digest.js';
 import { previewPage } from './preview.js';
 import { getSchedule, nextSend, saveSchedule, slotOf, validSchedule } from './schedule.js';
 import { ensureSchema } from './schema.js';
-import { addWeeks, dateParts, episodeCode, episodeDate, groupByWeek, startOfWeek } from './time.js';
+import {
+  addDays, addWeeks, dateParts, episodeCode, episodeDate, groupByWeek, localDate, startOfDay, startOfWeek,
+} from './time.js';
 import { fetchShow, recentUpdates, searchShows } from './tvmaze.js';
 
 const UPCOMING_WEEKS = 4;
@@ -36,14 +38,20 @@ async function state(env, admin) {
   // run side by side, so the page waits for one database round trip, not four.
   const now = new Date();
   const first = startOfWeek(now, tz);
+  // A US Sunday-night episode is dated Sunday but airs after the owner's week
+  // has already turned to Monday. Until it airs it isn't in Catch up, so
+  // Upcoming keeps it at the top of This week: look back a couple of days and
+  // keep the earlier-dated episodes that haven't aired yet.
   const [shows, upcoming, backlog] = await Promise.all([
     listShows(env),
-    upcomingEpisodes(env, first, addWeeks(first, UPCOMING_WEEKS, tz), tz),
+    upcomingEpisodes(env, startOfDay(addDays(first, -2), tz), addWeeks(first, UPCOMING_WEEKS, tz), tz),
     backlogEpisodes(env, now),
   ]);
+  const firstDate = localDate(first, tz);
+  const pending = upcoming.filter((e) => episodeDate(e, tz) >= firstDate || Date.parse(e.airstamp) >= now.getTime());
   return {
     admin, tz, shows,
-    weeks: groupByWeek(upcoming, first, UPCOMING_WEEKS, tz),
+    weeks: groupByWeek(pending, first, UPCOMING_WEEKS, tz),
     backlogTotal: backlog.total,
     backlog: backlog.episodes.map((e) => {
       const p = dateParts(episodeDate(e, tz));
