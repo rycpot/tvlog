@@ -196,7 +196,9 @@ function catchUp(backlog, total) {
     <button class="catch" type="button" data-catch="${e.id}" data-show="${e.show_id}"${pendingCatch.has(e.id) ? ' disabled aria-pressed="true"' : ''} aria-label="Mark ${esc(e.show_name)} ${e.code} watched">
       <span class="box" aria-hidden="true"></span>
       <span class="catch-text">
-        <span class="what">${esc(e.show_name)}</span>
+        ${e.count
+                ? `<span class="what grouped"><span class="name">${esc(e.show_name)}</span><span class="count num">${e.count} episodes</span></span>`
+                : `<span class="what">${esc(e.show_name)}</span>`}
         <span class="meta-line num">${e.code} · ${e.date}${e.name ? ` · ${esc(e.name)}` : ''}</span>
       </span>
     </button>`).join('');
@@ -220,7 +222,9 @@ function upcoming(weeks) {
           ${w.episodes.length ? w.episodes.map((e) => `
             <a class="up${e.airstamp && Date.parse(e.airstamp) <= cutoff ? ' aired' : ''}" href="/show/${e.show_id}">
               <span class="when">${e.weekday} ${e.day}</span>
-              <span class="what">${esc(e.show_name)}</span>
+              ${e.count
+                ? `<span class="what grouped"><span class="name">${esc(e.show_name)}</span><span class="count num">${e.count} episodes</span></span>`
+                : `<span class="what">${esc(e.show_name)}</span>`}
               <span class="code num">${e.code}</span>
             </a>`).join('') : '<p class="none">Nothing airing.</p>'}
         </div>`).join('')}

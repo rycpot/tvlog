@@ -26,7 +26,7 @@ visitor you see the four lists; the owner signs in to get Catch up, Upcoming and
   has ended and it moves to Finished. Move a show to Finished and every aired episode is marked watched.
 - **Half-star ratings** out of 5, editable right on the homepage.
 - **Catch up:** every aired episode of your Watching shows that you haven't seen yet, ready to tick off.
-- **Upcoming:** the next four weeks of episodes from your Watching shows, grouped by week.
+- **Upcoming:** the next four weeks of episodes from your Watching shows, grouped by week. Three or more episodes of one show on the same day (a season dropped at once) share one row.
 - **Weekly email (optional):** the coming week's episodes in a clean email, sent through Brevo on the day and time
   you pick. There's a preview of the next email, with a gear icon to change when it's sent.
 - **Anyone can look, only you can edit.** Visitors see your lists. You sign in with a password to change things.

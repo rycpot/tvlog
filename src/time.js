@@ -111,10 +111,39 @@ export function groupByWeek(episodes, firstWeek, weeks, tz) {
     out.push({
       label: weekLabel(i),
       range: weekRange(start, tz, earliest),
-      episodes: inWeek
+      episodes: groupRuns(inWeek
         // Stable sort, so episodes on the same day keep their airstamp order.
         .sort((a, b) => episodeDate(a, tz).localeCompare(episodeDate(b, tz)))
-        .map((e) => ({ ...e, ...dateParts(episodeDate(e, tz)), code: episodeCode(e.season, e.number) })),
+        .map((e) => ({ ...e, ...dateParts(episodeDate(e, tz)), code: episodeCode(e.season, e.number) })), tz),
+    });
+  }
+  return out;
+}
+
+// Three or more episodes of one show and season on the same day (a season
+// dropped at once) become one row: `count` episodes, coded "S1 · E1–E10",
+// with the latest airstamp so the row only dims once every episode has aired.
+// One or two stay as their own rows. Expects items that already have `code`.
+export const GROUP_FROM = 3;
+export function groupRuns(items, tz) {
+  const buckets = new Map();
+  for (const e of items) {
+    const key = e.number == null ? Symbol() : `${episodeDate(e, tz)}|${e.show_id}|${e.season}`;
+    if (!buckets.has(key)) buckets.set(key, []);
+    buckets.get(key).push(e);
+  }
+  const out = [];
+  for (const run of buckets.values()) {
+    if (run.length < GROUP_FROM) { out.push(...run); continue; }
+    const nums = run.map((e) => e.number);
+    const stamps = run.map((e) => e.airstamp);
+    const [lo, hi] = [Math.min(...nums), Math.max(...nums)];
+    out.push({
+      ...run[0],
+      count: run.length,
+      code: `S${run[0].season} · E${lo}–E${hi}`,
+      name: null,
+      airstamp: stamps.every(Boolean) ? stamps.reduce((a, b) => (Date.parse(b) > Date.parse(a) ? b : a)) : null,
     });
   }
   return out;

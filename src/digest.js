@@ -3,7 +3,7 @@
 // that is the coming Monday–Sunday week.
 
 import { upcomingEpisodes } from './db.js';
-import { addDays, dateParts, episodeCode, episodeDate, startOfDay, weekRange } from './time.js';
+import { addDays, dateParts, episodeCode, episodeDate, groupRuns, startOfDay, weekRange } from './time.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
@@ -22,6 +22,7 @@ export async function buildDigest(env, now = new Date()) {
     if (!days.length || days[days.length - 1].key !== key) days.push({ key, items: [] });
     days[days.length - 1].items.push({ ...e, code: episodeCode(e.season, e.number) });
   }
+  for (const d of days) d.items = groupRuns(d.items, tz);
 
   const site = env.SITE_URL ? `<a href="${esc(env.SITE_URL)}" style="color:#111111">Open tvlog</a>` : '';
   const rows = days.map((d) => `
@@ -32,7 +33,7 @@ export async function buildDigest(env, now = new Date()) {
         ${e.poster ? `<img src="${esc(e.poster)}" width="48" height="68" alt="" style="display:block;width:48px;height:68px;object-fit:cover">` : ''}
       </td>
       <td style="padding:14px 12px 14px 0;border-bottom:1px solid #E4E4E4;vertical-align:top">
-        <div style="font-size:16px;font-weight:700;color:#111111">${esc(e.show_name)}</div>
+        <div style="font-size:16px;font-weight:700;color:#111111">${esc(e.show_name)}${e.count ? ` <span style="display:inline-block;vertical-align:2px;margin-left:6px;padding:2px 6px;border:1px solid #111111;font-size:10px;font-weight:700;letter-spacing:0.08em;line-height:1.3;text-transform:uppercase">${e.count} episodes</span>` : ''}</div>
         <div style="font-size:14px;color:#5E5E5E;padding-top:4px">${esc(e.code)}${e.name ? ` · ${esc(e.name)}` : ''}</div>
       </td>
     </tr>`).join('')}`).join('');
