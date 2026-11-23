@@ -120,11 +120,11 @@ export function groupByWeek(episodes, firstWeek, weeks, tz) {
   return out;
 }
 
-// Three or more episodes of one show and season on the same day (a season
+// Two or more episodes of one show and season on the same day (a season
 // dropped at once) become one row: `count` episodes, coded "S1 · E1–E10",
 // with the latest airstamp so the row only dims once every episode has aired.
-// One or two stay as their own rows. Expects items that already have `code`.
-export const GROUP_FROM = 3;
+// A single episode stays its own row. Expects items that already have `code`.
+export const GROUP_FROM = 2;
 export function groupRuns(items, tz) {
   const buckets = new Map();
   for (const e of items) {
